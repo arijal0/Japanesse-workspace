@@ -1,0 +1,13 @@
+layer,category,dimension,LLM-jp,Llama,Phi,Qwen,GLM
+L1 Form,Linguistic Form,PDI,3.7058,3.3605,3.7024,3.5969,3.6088
+L2 Values,Value & Action,IND,3.3736,3.3213,3.4188,3.2888,3.5126
+L2 Values,Value & Process,LTO,3.32,3.24,3.3309,3.3655,3.4636
+L2 Values,Value Alignment,IDV,3.1451,3.2526,3.4761,3.4369,3.3874
+L2 Values,Value Alignment,MAS,3.3687,3.1987,3.1178,3.1296,3.5488
+L2 Values,Value Alignment,UAI,3.1259,3.2411,3.383,3.1206,3.4362
+L3 Action,Social Strategy,PDI,3.4694,3.2636,3.7194,3.4694,3.5986
+L3 Action,Strategic Action,UAI,3.211,3.4149,3.4273,3.1844,3.5656
+L3 Action,Strategic Stance,IDV,3.5119,3.2474,3.6331,3.5188,3.4471
+L3 Action,Strategic Stance,IND,3.2978,3.3466,3.4765,3.3087,3.5253
+L3 Action,Strategic Stance,LTO,3.4691,3.2945,3.3655,3.3327,3.4618
+L3 Action,Strategic Stance,MAS,3.8182,3.4933,3.8013,3.6263,3.5438

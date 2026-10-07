@@ -1,0 +1,7 @@
+dimension,raters (k),"ICC(2,1) single rater","ICC(2,k) mean of k raters"
+PDI,294,0.029,0.8976
+IDV,293,0.0241,0.8784
+UAI,282,0.029,0.8937
+MAS,297,0.0591,0.9491
+LTO,275,0.0069,0.6566
+IND,277,0.0106,0.7486

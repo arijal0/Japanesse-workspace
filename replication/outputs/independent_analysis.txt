@@ -1,0 +1,183 @@
+
+==============================================================================
+A. Data audit
+==============================================================================
+rows=42,950  raters=1,718  missing scores=0
+rows per rater: {25: 1718}  (5 models x 5 questions)
+dimensions per rater: {1: 1718}
+raters per dimension: {'PDI': 294, 'IDV': 293, 'UAI': 282, 'MAS': 297, 'LTO': 275, 'IND': 277}
+score distribution: {1: '2.1%', 2: '11.2%', 3: '38.8%', 4: '38.8%', 5: '9.1%'}
+straight-liners (same score on all 25 items): 143 (8.3%)
+
+Note: the CSV has no response/scenario ID, so ratings cannot be linked back to
+individual generated texts or to the 5 scenarios within a dimension.
+
+==============================================================================
+B. JWCAS recomputed from raw Q5 ratings
+==============================================================================
+dimension    PDI    IDV    UAI    MAS    LTO    IND  JWCAS  paper  abs diff
+model                                                                      
+Phi        3.684  3.567  3.436  3.566  3.331  3.430  3.502  3.502       0.0
+GLM        3.527  3.382  3.592  3.377  3.429  3.502  3.468  3.468       0.0
+LLM-jp     3.595  3.423  3.284  3.596  3.382  3.318  3.433  3.433       0.0
+Qwen       3.558  3.536  3.113  3.434  3.345  3.354  3.390  3.390       0.0
+Llama      3.381  3.259  3.404  3.370  3.291  3.245  3.325  3.325       0.0
+
+All five JWCAS values match the paper to 3 decimals.
+Spread between best and worst model: 0.177 points on a 1-5 scale
+Pooled SD of a single Q5 rating: 0.860
+
+==============================================================================
+C. Rater-level bootstrap of JWCAS (resampling raters within each dimension)
+==============================================================================
+        JWCAS  CI95 low  CI95 high  P(rank 1)  mean rank
+Phi     3.502     3.462      3.541      0.960      1.040
+GLM     3.468     3.428      3.507      0.039      2.019
+LLM-jp  3.433     3.396      3.472      0.000      2.962
+Qwen    3.390     3.350      3.430      0.000      3.982
+Llama   3.325     3.284      3.366      0.000      4.998
+
+==============================================================================
+D. Inter-rater reliability, implemented from the ANOVA formulas
+==============================================================================
+           raters (k)  ICC(2,1) single rater  ICC(2,k) mean of k raters
+dimension                                                              
+PDI               294                  0.029                      0.898
+IDV               293                  0.024                      0.878
+UAI               282                  0.029                      0.894
+MAS               297                  0.059                      0.949
+LTO               275                  0.007                      0.657
+IND               277                  0.011                      0.749
+
+Mean ICC(2,k) = 0.837   (paper: 0.837)
+Mean ICC(2,1) = 0.026
+
+Interpretation: the paper's 0.837 is the reliability of the *average* of ~290
+raters. Any single rater agrees with the others only weakly; the signal emerges
+because so many ratings are averaged.
+
+==============================================================================
+E. Linear mixed model  score ~ model + (1 | rater)  on Q5
+==============================================================================
+     comparison    diff       z      p  p_fdr   sig  d (diff / rating SD)
+   Llama vs Phi -0.1793 -8.3712 0.0000 0.0000  True               -0.2085
+   Llama vs GLM -0.1414 -6.6046 0.0000 0.0000  True               -0.1645
+    Phi vs Qwen  0.1123  5.2456 0.0000 0.0000  True                0.1307
+LLM-jp vs Llama  0.1100  5.1369 0.0000 0.0000  True                0.1280
+    Qwen vs GLM -0.0745 -3.4790 0.0005 0.0010  True               -0.0867
+  LLM-jp vs Phi -0.0693 -3.2343 0.0012 0.0020  True               -0.0806
+  Llama vs Qwen -0.0669 -3.1256 0.0018 0.0025  True               -0.0779
+ LLM-jp vs Qwen  0.0431  2.0113 0.0443 0.0554 False                0.0501
+     Phi vs GLM  0.0378  1.7667 0.0773 0.0859 False                0.0440
+  LLM-jp vs GLM -0.0314 -1.4677 0.1422 0.1422 False               -0.0366
+
+==============================================================================
+F. Non-parametric check: Friedman + Wilcoxon signed-rank on Q5 (raters as blocks)
+==============================================================================
+Friedman chi2=78.46, p=3.68e-16
+     comparison  mean diff      p  ties (%)  p_fdr   sig
+   Llama vs Phi    -0.1793 0.0000   55.9371 0.0000  True
+   Llama vs GLM    -0.1414 0.0000   54.5984 0.0000  True
+    Phi vs Qwen     0.1123 0.0000   61.6414 0.0000  True
+LLM-jp vs Llama     0.1100 0.0000   55.7043 0.0000  True
+    Qwen vs GLM    -0.0745 0.0006   55.9371 0.0012  True
+  Llama vs Qwen    -0.0669 0.0008   55.8789 0.0014  True
+  LLM-jp vs Phi    -0.0693 0.0011   56.9267 0.0016  True
+ LLM-jp vs Qwen     0.0431 0.0382   55.2386 0.0477  True
+     Phi vs GLM     0.0378 0.0848   58.0326 0.0942 False
+  LLM-jp vs GLM    -0.0314 0.1864   52.0373 0.1864 False
+
+The 'ties' column shows how often a rater gave both models the same Q5 score.
+
+==============================================================================
+G. Sensitivity: drop raters who gave the same score to all 25 items
+==============================================================================
+dropped 143 raters, kept 1575
+        all raters  without straight-liners
+model                                      
+Phi          3.502                    3.519
+GLM          3.468                    3.486
+LLM-jp       3.433                    3.443
+Qwen         3.390                    3.397
+Llama        3.325                    3.328
+Ranking unchanged: True
+
+==============================================================================
+H. Three-layer view (Form / Values / Action) from diagnostic items Q1-Q4
+==============================================================================
+Which items feed each layer:
+  L1 Form    <- PDI:Q1+Q3
+  L2 Values  <- IDV:Q3+Q4, UAI:Q1+Q4, MAS:Q1+Q3, LTO:Q2+Q3, IND:Q2+Q3
+  L3 Action  <- PDI:Q2+Q4, IDV:Q1+Q2, UAI:Q2+Q3, MAS:Q2+Q4, LTO:Q1+Q4, IND:Q1+Q4
+
+Category means (rows) by model (columns):
+model                                 LLM-jp  Llama    Phi   Qwen    GLM
+layer     category         dimension                                    
+L1 Form   Linguistic Form  PDI         3.706  3.361  3.702  3.597  3.609
+L2 Values Value & Action   IND         3.374  3.321  3.419  3.289  3.513
+          Value & Process  LTO         3.320  3.240  3.331  3.365  3.464
+          Value Alignment  IDV         3.145  3.253  3.476  3.437  3.387
+                           MAS         3.369  3.199  3.118  3.130  3.549
+                           UAI         3.126  3.241  3.383  3.121  3.436
+L3 Action Social Strategy  PDI         3.469  3.264  3.719  3.469  3.599
+          Strategic Action UAI         3.211  3.415  3.427  3.184  3.566
+          Strategic Stance IDV         3.512  3.247  3.633  3.519  3.447
+                           IND         3.298  3.347  3.477  3.309  3.525
+                           LTO         3.469  3.295  3.365  3.333  3.462
+                           MAS         3.818  3.493  3.801  3.626  3.544
+
+Layer means (unweighted mean of the category x dimension cells above):
+model      LLM-jp  Llama    Phi   Qwen    GLM
+layer                                        
+L1 Form     3.706  3.361  3.702  3.597  3.609
+L2 Values   3.267  3.251  3.345  3.268  3.470
+L3 Action   3.463  3.343  3.571  3.407  3.524
+
+Within-model profile (layer mean minus that model's mean across layers):
+model      LLM-jp  Llama    Phi   Qwen    GLM
+layer                                        
+L1 Form     0.227  0.042  0.163  0.173  0.075
+L2 Values  -0.212 -0.067 -0.194 -0.156 -0.064
+L3 Action  -0.016  0.025  0.031 -0.017 -0.010
+
+==============================================================================
+I. Direct test of 'LLM-jp sounds right but acts less right' (PDI only)
+==============================================================================
+PDI is the only dimension with both Form items (Q1, Q3) and Action items (Q2, Q4),
+so it is the only place the claim can be tested within the same raters.
+
+   vs  LLM-jp minus other (Form)  LLM-jp minus other (Action)  interaction      t      p  p_fdr
+Llama                     0.3452                       0.2058       0.1395 3.2533 0.0013 0.0017
+  Phi                     0.0034                      -0.2500       0.2534 5.7922 0.0000 0.0000
+ Qwen                     0.1088                       0.0000       0.1088 2.4682 0.0142 0.0142
+  GLM                     0.0969                      -0.1293       0.2262 5.0736 0.0000 0.0000
+
+A positive, significant interaction means LLM-jp's advantage (or smaller deficit)
+on Form shrinks on Action, which is the paper's 'form > strategy' pattern.
+
+==============================================================================
+J. Checks of statements in the paper against the released data/code
+==============================================================================
+1) Wald chi2 for model effect = 83.70 on 4 df  ->  chi2/df = 20.93
+   Paper reports F(4, 8580) = 20.93. So the paper's F is the Wald chi2/df from a
+   rater-only model; the paper text says scenario ID was also a random intercept,
+   but the CSV has no scenario column and the notebook does not include it.
+
+2) ICC from the LMM variance components = 0.342 / (0.342 + 0.394) = 0.464
+   Paper says the 0.837 ICC was computed 'from the LMM's variance components', but
+   0.837 actually comes from pingouin ICC2k averaged over dimensions (section D).
+   The LMM quantity measures how much raters differ in overall leniency, not agreement.
+
+3) Cronbach's alpha of the 5 items per dimension (rows = rater x model); the values
+   are blank in the HTML version of the paper:
+   PDI: alpha = 0.887
+   IDV: alpha = 0.866
+   UAI: alpha = 0.884
+   MAS: alpha = 0.796
+   LTO: alpha = 0.855
+   IND: alpha = 0.865
+
+4) Paper's Discussion mentions 'a 0.5-point difference on a 5-point scale' between top
+   and lower models. Actual JWCAS range = 0.177.
+
+Outputs written to replication/outputs/
